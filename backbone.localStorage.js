@@ -6,18 +6,18 @@
  */
 (function (root, factory) {
    if (typeof exports === 'object' && typeof require === 'function') {
-     module.exports = factory(require("underscore"), require("backbone"));
+     module.exports = factory(require("backbone"));
    } else if (typeof define === "function" && define.amd) {
       // AMD. Register as an anonymous module.
-      define(["underscore","backbone"], function(_, Backbone) {
+      define(["backbone"], function(Backbone) {
         // Use global variables if the locals are undefined.
-        return factory(_ || root._, Backbone || root.Backbone);
+        return factory(Backbone || root.Backbone);
       });
    } else {
       // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
-      factory(_, Backbone);
+      factory(Backbone);
    }
-}(this, function(_, Backbone) {
+}(this, function(Backbone) {
 // A simple module to replace `Backbone.sync` with *localStorage*-based
 // persistence. Models are given GUIDS, and saved into a JSON object. Simple
 // as that.
@@ -47,7 +47,56 @@ Backbone.LocalStorage = window.Store = function(name) {
   this.records = (store && store.split(",")) || [];
 };
 
-_.extend(Backbone.LocalStorage.prototype, {
+// Copy used underscore methods here
+var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+var slice              = ArrayProto.slice;
+var nativeFilter       = ArrayProto.filter;
+
+
+_extend = function(obj) {
+  ps = Array.prototype.slice.call(arguments, 1);
+  ps.forEach(function(source) {
+    if (source) {
+      for (var prop in source) {
+        obj[prop] = source[prop];
+      }
+    }
+  });
+  return obj;
+};
+
+_contains = _include = function(obj, target) {
+  if (obj == null) return false;
+  if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+  return any(obj, function(value) {
+    return value === target;
+  });
+};
+
+_chain = function(obj) {
+  return _(obj).chain();
+};
+
+
+_filter = _select = function(obj, iterator, context) {
+  var results = [];
+  if (obj == null) return results;
+  if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
+  each(obj, function(value, index, list) {
+    if (iterator.call(context, value, index, list)) results.push(value);
+  });
+  return results;
+};
+
+_reject = function(obj, iterator, context) {
+  return _filter(obj, function(value, index, list) {
+    return !iterator.call(context, value, index, list);
+  }, context);
+};
+
+//
+
+_extend(Backbone.LocalStorage.prototype, {
 
   // Save the current state of the **Store** to *localStorage*.
   save: function() {
@@ -70,7 +119,7 @@ _.extend(Backbone.LocalStorage.prototype, {
   // Update a model by replacing its copy in `this.data`.
   update: function(model) {
     this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    if (!_.include(this.records, model.id.toString()))
+    if (!_include(this.records, model.id.toString()))
       this.records.push(model.id.toString()); this.save();
     return this.find(model);
   },
@@ -83,7 +132,7 @@ _.extend(Backbone.LocalStorage.prototype, {
   // Return the array of all models currently in storage.
   findAll: function() {
     // Lodash removed _#chain in v1.0.0-rc.1
-    return (_.chain || _)(this.records)
+    return (_chain || _)(this.records)
       .map(function(id){
         return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
       }, this)
@@ -96,7 +145,7 @@ _.extend(Backbone.LocalStorage.prototype, {
     if (model.isNew())
       return false
     this.localStorage().removeItem(this.name+"-"+model.id);
-    this.records = _.reject(this.records, function(id){
+    this.records = _reject(this.records, function(id){
       return id === model.id.toString();
     });
     this.save();
@@ -122,7 +171,7 @@ _.extend(Backbone.LocalStorage.prototype, {
 
     // Lodash removed _#chain in v1.0.0-rc.1
     // Match all data items (e.g., "foo-ID") and remove.
-    (_.chain || _)(local).keys()
+    (_chain || _)(local).keys()
       .filter(function (k) { return itemRe.test(k); })
       .each(function (k) { local.removeItem(k); });
 
