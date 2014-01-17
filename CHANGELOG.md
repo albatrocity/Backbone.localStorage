@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.8
+
+- Change Backbone.$.Deferred to Backbone.Deferred for Exoskeleton
+
 ## 1.1.7 - October 4, 2013
 
 - Fix CommonJS requiring (Brandon Dimcheff)
