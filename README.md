@@ -1,4 +1,4 @@
-# Backbone localStorage Adapter v1.1.7
+# Backbone localStorage Adapter v1.1.8
 
 [![Build Status](https://secure.travis-ci.org/jeromegn/Backbone.localStorage.png?branch=master)](http://travis-ci.org/jeromegn/Backbone.localStorage)
 
@@ -19,11 +19,11 @@ Create your collections like so:
 
 ```javascript
 window.SomeCollection = Backbone.Collection.extend({
-  
+
   localStorage: new Backbone.LocalStorage("SomeCollection"), // Unique name within your app.
-  
+
   // ... everything else is normal.
-  
+
 });
 ```
 ### RequireJS
@@ -34,7 +34,7 @@ Include [RequireJS](http://requirejs.org):
 <script type="text/javascript" src="lib/require.js"></script>
 ```
 
-RequireJS config: 
+RequireJS config:
 ```javascript
 require.config({
     paths: {
@@ -52,7 +52,7 @@ define("someCollection", ["localstorage"], function() {
     var SomeCollection = Backbone.Collection.extend({
         localStorage: new Backbone.LocalStorage("SomeCollection") // Unique name within your app.
     });
-  
+
     return new SomeCollection();
 });
 ```
