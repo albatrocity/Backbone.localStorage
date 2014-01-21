@@ -1,6 +1,6 @@
 
 
-describe("Backbone.localStorage", function(){
+describe("Exoskeleton.localStorage", function(){
 
   var attributes = {
     string: "String",

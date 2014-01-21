@@ -18,7 +18,7 @@ clean:
 	$(bin)/browserify -e $< -o $@
 
 minify:
-	$(bin)/uglifyjs -o backbone.localStorage-min.js backbone.localStorage.js
+	$(bin)/uglifyjs -o exoskeleton.localStorage-min.js exoskeleton.localStorage.js
 
 # Get version number from package.json, need this for tagging.
 version = $(shell node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
