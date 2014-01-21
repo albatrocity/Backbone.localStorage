@@ -132,12 +132,9 @@ _extend(Backbone.LocalStorage.prototype, {
   // Return the array of all models currently in storage.
   findAll: function() {
     // Lodash removed _#chain in v1.0.0-rc.1
-    return (_chain || _)(this.records)
-      .map(function(id){
+    return this.records.map(function(id){
         return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
       }, this)
-      .compact()
-      .value();
   },
 
   // Delete a model from `this.data`, returning it.
@@ -171,9 +168,9 @@ _extend(Backbone.LocalStorage.prototype, {
 
     // Lodash removed _#chain in v1.0.0-rc.1
     // Match all data items (e.g., "foo-ID") and remove.
-    (_chain || _)(local).keys()
-      .filter(function (k) { return itemRe.test(k); })
-      .each(function (k) { local.removeItem(k); });
+    var objkeys = Object.keys(local)
+    var filtered = _filter(objkeys, function (k) { return itemRe.test(k); })
+    filtered.forEach(function (k) { local.removeItem(k); });
 
     this.records.length = 0;
   },
