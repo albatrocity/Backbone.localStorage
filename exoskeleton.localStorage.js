@@ -49,6 +49,7 @@ Backbone.LocalStorage = window.Store = function(name) {
 
 // Copy used underscore methods here
 var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+var nativeIndexOf      = ArrayProto.indexOf;
 var slice              = ArrayProto.slice;
 var nativeFilter       = ArrayProto.filter;
 
