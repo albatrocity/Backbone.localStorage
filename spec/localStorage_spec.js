@@ -1,3 +1,46 @@
+// Underscore methods:
+
+_extend = function(obj) {
+  Array.prototype.slice.call(arguments, 1).forEach(function(source) {
+    if (source) {
+      for (var prop in source) {
+        obj[prop] = source[prop];
+      }
+    }
+  });
+  return obj;
+};
+_isObject = function(obj) {
+  return obj === Object(obj);
+};
+_clone = function(obj) {
+  if (!_isObject(obj)) return obj;
+  return Array.isArray(obj) ? obj.slice() : _extend({}, obj);
+};
+_times = function(n, iterator, context) {
+  var accum = Array(Math.max(0, n));
+  for (var i = 0; i < n; i++) accum[i] = iterator.call(context, i);
+  return accum;
+};
+_values = function(obj) {
+  var keys = Object.keys(obj);
+  var length = keys.length;
+  var values = new Array(length);
+  for (var i = 0; i < length; i++) {
+    values[i] = obj[keys[i]];
+  }
+  return values;
+};
+_identity = function(value) {
+  return value;
+};
+_toArray = function(obj) {
+  if (!obj) return [];
+  if (Array.isArray(obj)) return Array.prototype.slice.call(obj);
+  if (obj.length === +obj.length) return obj.models.map(function(value) {return value});
+  return _values(obj);
+};
+
 
 
 describe("Exoskeleton.localStorage", function(){
@@ -53,7 +96,7 @@ describe("Exoskeleton.localStorage", function(){
       });
 
       it("should have a populated model", function(){
-        var withId = _.clone(attributes);
+        var withId = _clone(attributes);
         withId.id = model.id;
         assert.deepEqual(model.toJSON(), withId);
       });
@@ -108,7 +151,7 @@ describe("Exoskeleton.localStorage", function(){
           });
 
           it("should have kept its old properties", function(){
-            var withId = _.clone(attributes);
+            var withId = _clone(attributes);
             withId.id = 1;
             assert.deepEqual(model2.toJSON(), withId);
           });
@@ -125,13 +168,14 @@ describe("Exoskeleton.localStorage", function(){
         before(function(){
           // Make sure there's at least items in there
           // ... can't rely on previous tests
-          _(5).times(function(){
+          _times(5, function(){
             collection.create()
           });
         });
 
         before(function(){
-          _.each(collection.toArray(), function(model){
+          var collArray = _toArray(collection)
+          collArray.forEach(function(model){
             model.destroy();
           });
           beforeFetchLength = collection.length;
@@ -171,7 +215,7 @@ describe("Exoskeleton.localStorage", function(){
         });
 
         it("should have used the custom `idAttribute`", function(){
-          assert.equal(collection2.first().id, collection2.first().get("_id"));
+          assert.equal(collection2.models[0].id, collection2.models[0].get("_id"));
         });
 
       });
@@ -226,7 +270,7 @@ describe("Exoskeleton.localStorage", function(){
         });
 
         it("should persist the changes", function(){
-          assert.deepEqual(model.toJSON(), _.extend(_.clone(attributes), {id: model.id, number: 42}));
+          assert.deepEqual(model.toJSON(), _extend(_clone(attributes), {id: model.id, number: 42}));
         });
 
       });
@@ -349,10 +393,8 @@ describe("AMD", function(){
 
   require.config({
     paths: {
-      jquery: "support/jquery",
-      underscore: "support/underscore",
-      backbone: "support/backbone",
-      localstorage: "../backbone.localStorage"
+      backbone: "support/exoskeleton",
+      localstorage: "../exoskeleton.localStorage"
     }
   });
 
